@@ -1,26 +1,47 @@
 -- ======================================================================================================
--- use lab_mysql database ----------------------------------------------------------------------------------
+-- DROP ALL TABLES
+-- DROP TABLE IF EXISTS `CARS`;
+-- DROP TABLE IF EXISTS `CUSTOMERS`;
+-- DROP TABLE IF EXISTS `SALESPERSONS`;
+-- DROP TABLE IF EXISTS `INVOICES`;
+-- ======================================================================================================
+-- DROP DATABASE (with all tables)
+-- DROP DATABASE lab_mysql;
+-- ======================================================================================================
+-- create lab_mysql database if it doesn't exist ---------------------- 
+CREATE DATABASE IF NOT EXISTS lab_mysql;
+-- ======================================================================================================
+-- use lab_mysql database ----------------------
 USE lab_mysql;
+-- ======================================================================================================
+-- DROP ALL TABLES
+DROP TABLE IF EXISTS `CARS`;
+DROP TABLE IF EXISTS `CUSTOMERS`;
+DROP TABLE IF EXISTS `SALESPERSONS`;
+DROP TABLE IF EXISTS `INVOICES`;
 
 -- ======================================================================================================
+DROP TABLE IF EXISTS `CARS`;
 -- TABLE : CARS ----------------------------------------------------------------------------------------
 CREATE TABLE `CARS` (
-	`manufacturer`CHAR(100), 
+	`VIN` CHAR(50),
+    `manufacturer`CHAR(100), 
     `model` CHAR(100), 
     `year` INT, 
     `color` CHAR(100),
 	
     -- FOREIGN KEYS:
-    `customer ID` INT NOT NULL,
+    `customer ID` INT,
     	-- FK CUSTOMERS
-	`invoice number` INT NOT NULL,
+	`invoice number` BIGINT,
     	-- FK INVOICES
     
     -- PRIMARY KEY 
-    `VIN` CHAR(17) NOT NULL,
-	PRIMARY KEY (`VIN`) 
+    `car ID` INT NOT NULL AUTO_INCREMENT,
+	PRIMARY KEY (`car ID`) 
 );
 -- ======================================================================================================
+DROP TABLE IF EXISTS `CUSTOMERS`;
 -- TABLE : CUSTOMERS ------------------------------------------------------------------------------------
 CREATE TABLE `CUSTOMERS` (
     `name` CHAR(100), 
@@ -33,14 +54,15 @@ CREATE TABLE `CUSTOMERS` (
     `zip/postal code` CHAR(10),    
     
     -- FOREIGN KEYS:
-    `staff ID` INT NOT NULL, 
+    `staff ID` INT(5) ZEROFILL, 
         -- FK SALESPERSONS
     
     -- PRIMARY KEY
-    `customer ID` INT NOT NULL,  
+    `customer ID` INT,  
 	PRIMARY KEY (`customer ID`) 
 );
 -- ======================================================================================================
+DROP TABLE IF EXISTS `SALESPERSONS`;
 -- TABLE : SALESPERSONS ---------------------------------------------------------------------------------
 CREATE TABLE `SALESPERSONS` (
     `name` CHAR(100), 
@@ -48,22 +70,27 @@ CREATE TABLE `SALESPERSONS` (
     -- FOREIGN KEYS:
 		-- NONE
     -- PRIMARY KEY
-    `staff ID` INT NOT NULL, 
+    `staff ID` INT(5) ZEROFILL,
 	PRIMARY KEY (`staff ID`) 
 );
+
 -- ======================================================================================================
+DROP TABLE IF EXISTS `INVOICES`;
 -- TABLE : INVOICES -------------------------------------------------------------------------------------
 CREATE TABLE `INVOICES` (
     `date` DATE,
     
     -- FOREIGN KEYS:
-	`customer ID` INT NOT NULL,
+	`car ID` INT,
+        -- FK CARS / CAR
+	`customer ID` INT,
         -- FK CUSTOMERS / CUSTOMER
-	`staff ID` INT NOT NULL, 
+	`staff ID` INT(5) ZEROFILL, 
 		-- FK from SALESPERSONS / STUFF
 
+
     -- PRIMARY KEY
-    `invoice number` INT NOT NULL AUTO_INCREMENT,  
+    `invoice number` BIGINT AUTO_INCREMENT,  
 	PRIMARY KEY (`invoice number`) 
 );
 
@@ -78,31 +105,8 @@ ADD CONSTRAINT `CARS FK INVOICES` FOREIGN KEY (`invoice number`) REFERENCES INVO
 
 -- ADD FK to INVOICES -------------------------------------------------------------------------------------
 ALTER TABLE `INVOICES`
+-- ADD CONSTRAINT `INVOICES FK CARS` FOREIGN KEY (`car ID`) REFERENCES CARS(`car ID`),
 ADD CONSTRAINT `INVOICES FK CUSTOMERS` FOREIGN KEY (`customer ID`) REFERENCES CUSTOMERS(`customer ID`),
 ADD CONSTRAINT `INVOICES FK SALESPERSONS` FOREIGN KEY (`staff ID`) REFERENCES SALESPERSONS(`staff ID`);
--- Error Code: 1072. Key column 'staff ID' doesn't exist in table
 
--- ========================================================================================================
--- HOW TO -------------------------------------------------------------------------------------------------
--- How to drop a table from a database
-DROP TABLE `table_name`;
--- ---------------------------------------------------
--- How to alter a table and drop a foreign key
-ALTER TABLE `table_name`
-DROP FOREIGN KEY `foreign_key_name`;
--- ---------------------------------------------------
--- How to add constraints (Foreign keys to a table)
--- only add to the one that has a many or depends on it
--- Alter the table with constraints (relationships)
-ALTER TABLE `table_name`
-ADD CONSTRAINT `constraint_name` FOREIGN KEY (`foreign key name`) REFERENCES source_table(`foreign key name`),
-ADD CONSTRAINT `constraint_name` FOREIGN KEY (`foreign key name`) REFERENCES source_table(`foreign key name`),
-ADD CONSTRAINT `constraint_name` FOREIGN KEY (`foreign key name`) REFERENCES source_table(`foreign key name`);
--- ---------------------------------------------------
--- QUESTIONS!
--- When to use VARCHAR or CHAR?
--- What's the difference between CHAR, VARCHAR, TEXT?
--- Storage engine must support FK? What does it mean exactly?
-SHOW TABLE STATUS WHERE Name = 'table_name';
-SHOW TABLE STATUS WHERE Name = 'INVOICES';
 
